@@ -109,7 +109,13 @@ NAN_METHOD(recvfrom){
 
   if (info[1]->IsFunction()) {
     fn = info[1].As<Function>();
-    opt = 4096;
+
+    /* if no recv buf size was given, allocate recv buf by system limit size */
+    int optval;
+    socklen_t optlen = sizeof(optval);
+    if (getsockopt(fd, SOL_SOCKET, SO_RCVBUF, &optval, &optlen) == -1)
+      perror("getsockopt SO_SNDBUF");
+    opt = optval;
   }
 
   Callback *cb = new Callback(fn);

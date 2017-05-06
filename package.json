@@ -6,7 +6,7 @@
     "nan":              "2.6.2"
   },
   "devDependencies":  {
-    "sendto":           "0.0.1",
+    "sendto":           "0.0.2",
     "tape":             "3.5",
     "tap-spec":         "2.2"
   },
