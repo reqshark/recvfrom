@@ -76,22 +76,27 @@ void unixrecv(uv_poll_t *req, int status, int events) {
 }
 
 NAN_METHOD(recvfrom){
+  Local<Function> fn;
   String::Utf8Value path(info[0]);
   char *socket_path = *path;
 
-  // open unix datagram socket for node.js
+  /* open unix datagram socket for node.js */
   if ( (fd = socket(AF_UNIX, SOCK_DGRAM, 0)) == -1)
     perror("socket error");
 
-  int opt;
-  Local<Function> fn;
+  /* make socket non-blocking */
+  int opt = fcntl(fd, F_GETFL, 0);
+  if (opt == -1)
+    opt = 0;
+  int rc = fcntl(fd, F_SETFL, opt | O_NONBLOCK);
+  if (rc < 0)
+    perror("fcntl O_NONBLOCK fail");
 
+  /* set socket's recv buffer size */
   if (info[1]->IsNumber()) {
-    // set socket's recv buffer size
     opt = To<int>(info[1]).FromJust();
     if (setsockopt(fd, SOL_SOCKET, SO_RCVBUF, &opt, sizeof (opt)) < 0)
       perror("SO_RCVBUF setsockopt() fail");
-
     fn = info[2].As<Function>();
   }
 
@@ -106,10 +111,12 @@ NAN_METHOD(recvfrom){
   addr.sun_family = AF_UNIX;
   strcpy(addr.sun_path, socket_path);
 
-  int rc = bind(fd, (struct sockaddr*)&addr, sizeof(struct sockaddr_un));
+  /* bind the socket */
+  rc = bind(fd, (struct sockaddr*)&addr, sizeof(struct sockaddr_un));
   if(rc != 0)
     perror("bind() fail");
 
+  /* setup the libuv polling context handle */
   udp_t *ctx;
   ctx = reinterpret_cast<udp_t *>(calloc(1, sizeof(udp_t)));
   ctx->poll_handle.data = ctx;
@@ -117,12 +124,11 @@ NAN_METHOD(recvfrom){
   ctx->fd = fd;
   ctx->len = opt;
 
+  /* add the handle to node.js eventloop */
   if (ctx->fd != 0) {
     uv_poll_init_socket(uv_default_loop(), &ctx->poll_handle, ctx->fd);
     uv_poll_start(&ctx->poll_handle, UV_READABLE, unixrecv);
-
-    // return socket ctx as a buffer up into javasript land
-    info.GetReturnValue().Set(WrapPointer(ctx, 8));
+    info.GetReturnValue().Set(New<Number>(opt));
   }
 }
 
