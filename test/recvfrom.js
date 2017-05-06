@@ -45,7 +45,7 @@ function buffers (t) {
     t.ok( isBuffer(buf),   'recv a buf' )
     t.is( String(buf),  msg, `buffer recv'd from sendto is msg: ${msg}`  )
 
-    setTimeout(process.exit, 50, 0)
+    setImmediate(process.exit, 0)
   })
 
   sendto(addr, Buffer(msg))
