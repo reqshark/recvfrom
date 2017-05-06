@@ -10,7 +10,7 @@ $ node test | tap-spec
 
 there are some convenience operations via make:
 ```bash
-$ git clone https://github.com/reqshark/sendto.git && cd sendto
+$ git clone https://github.com/reqshark/recvfrom.git && cd recvfrom
 $ make clean && make && make check
 ```
 

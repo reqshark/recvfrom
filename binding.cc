@@ -1,6 +1,7 @@
 
 /*
   Copyright (c) 2017 Bent Cardan
+
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"),
   to deal in the Software without restriction, including without limitation
@@ -141,4 +142,4 @@ NAN_MODULE_INIT(Init) {
   EXPORT_METHOD(target, recvfrom);
 }
 
-NODE_MODULE(sendto, Init)
+NODE_MODULE(recvfrom, Init)

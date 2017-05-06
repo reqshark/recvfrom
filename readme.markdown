@@ -36,3 +36,5 @@ the buffer limit configuration is an optional parameter, so you can pass a callb
 require('recvfrom')('/tmp/mysocketpath', buf =>
   console.log('recv buf:', buf) )
 ```
+
+### MIT
