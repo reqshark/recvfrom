@@ -54,6 +54,8 @@ typedef struct udp_s {
   int len;
 } udp_t;
 
+// libuv calls `unixrecv()`, polling fd during eventloop w/ `uv_poll_start()`
+// descriptor indicates as buffer data from kernel is available to read by user space
 void unixrecv(uv_poll_t *req, int status, int events) {
   HandleScope scope;
 
@@ -115,8 +117,6 @@ NAN_METHOD(recvfrom){
   ctx->fd = fd;
   ctx->len = opt;
 
-  // libuv calls `unixrecv()`, polling fd during eventloop w/ `uv_poll_start()`
-  // descriptor indicates as buffer data from kernel is available to read by user space
   if (ctx->fd != 0) {
     uv_poll_init_socket(uv_default_loop(), &ctx->poll_handle, ctx->fd);
     uv_poll_start(&ctx->poll_handle, UV_READABLE, unixrecv);
