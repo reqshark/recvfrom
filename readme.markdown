@@ -6,7 +6,7 @@ this module performs a posix `recvfrom()` w/ optional `SO_RCVBUF`, to increase t
 
 ```bash
 npm i recvfrom
-node -e "require('recvfrom')recvfrom('/tmp/a', 9999, buf => console.log(buf+''))"
+node -e "require('recvfrom')('/tmp/a', 9999, buf => console.log(buf+''))"
 ```
 
 ### recvfrom(*string*, *number*, *function*)

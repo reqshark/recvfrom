@@ -37,10 +37,6 @@ function buffers (t) {
 
   const msg = 'Hello, world!'
 
-  try{
-    require('fs').unlinkSync(addr)
-  } catch($){}
-
   recvfrom(addr, buf => {
     t.ok( isBuffer(buf),   'recv a buf' )
     t.is( String(buf),  msg, `buffer recv'd from sendto is msg: ${msg}`  )

@@ -22,6 +22,8 @@
 */
 
 #include <sys/socket.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <sys/un.h>
 
 #include "nan.h"
@@ -55,8 +57,7 @@ typedef struct udp_s {
   int len;
 } udp_t;
 
-// libuv calls `unixrecv()`, polling fd during eventloop w/ `uv_poll_start()`
-// descriptor indicates as buffer data from kernel is available to read by user space
+// libuv calls `unixrecv()` once rx buffers are available to read by user space
 void unixrecv(uv_poll_t *req, int status, int events) {
   HandleScope scope;
 
@@ -79,7 +80,12 @@ void unixrecv(uv_poll_t *req, int status, int events) {
 NAN_METHOD(recvfrom){
   Local<Function> fn;
   String::Utf8Value path(info[0]);
-  char *socket_path = *path;
+  char *sockname = *path;
+
+  /* remove unix socket path if one is there */
+  struct stat st;
+  if (!stat(sockname, &st))
+    assert(!unlink(sockname));
 
   /* open unix datagram socket for node.js */
   if ( (fd = socket(AF_UNIX, SOCK_DGRAM, 0)) == -1)
@@ -110,11 +116,11 @@ NAN_METHOD(recvfrom){
 
   memset(&addr, 0, sizeof(addr));
   addr.sun_family = AF_UNIX;
-  strcpy(addr.sun_path, socket_path);
+  strcpy(addr.sun_path, sockname);
 
   /* bind the socket */
   rc = bind(fd, (struct sockaddr*)&addr, sizeof(struct sockaddr_un));
-  if(rc != 0)
+  if(rc)
     perror("bind() fail");
 
   /* setup the libuv polling context handle */
@@ -126,7 +132,7 @@ NAN_METHOD(recvfrom){
   ctx->len = opt;
 
   /* add the handle to node.js eventloop */
-  if (ctx->fd != 0) {
+  if (ctx->fd) {
     uv_poll_init_socket(uv_default_loop(), &ctx->poll_handle, ctx->fd);
     uv_poll_start(&ctx->poll_handle, UV_READABLE, unixrecv);
     info.GetReturnValue().Set(New<Number>(opt));
