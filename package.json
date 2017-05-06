@@ -1,6 +1,6 @@
 {
   "name":             "recvfrom",
-  "version":          "1.0.0",
+  "version":          "1.0.1",
   "description":      "unix datagram recvfrom with set socket option recv buffer size",
   "dependencies":     {
     "nan":              "2.6.2"
