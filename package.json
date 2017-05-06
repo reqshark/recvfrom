@@ -1,0 +1,36 @@
+{
+  "name":             "recvfrom",
+  "version":          "0.0.1",
+  "description":      "unix datagram recvfrom with configurable recv buffer size",
+  "dependencies":     {
+    "nan":              "2.6.2"
+  },
+  "devDependencies":  {
+    "sendto":           "0.0.1",
+    "tape":             "3.5",
+    "tap-spec":         "2.2"
+  },
+  "repository":       {
+    "type":             "git",
+    "url":              "git://github.com/reqshark/recvfrom"
+  },
+  "scripts":          {
+    "test":             "node test | tap-spec"
+  },
+  "homepage":         "http://req.link",
+  "keywords":         [
+    "datagram",
+    "recvfrom",
+    "sendto",
+    "unix",
+    "native",
+    "binding",
+    "addon"
+  ],
+  "author":           {
+    "name":             "Bent Cardan",
+    "email":            "bent@nothingsatisfies.com",
+    "url":              "http://req.link"
+  },
+  "license": "MIT"
+}
