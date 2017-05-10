@@ -81,6 +81,7 @@ NAN_METHOD(recvfrom){
   Local<Function> fn;
   String::Utf8Value path(info[0]);
   char *sockname = *path;
+  int opt = 16384;
 
   /* remove unix socket path if one is there */
   struct stat st;
@@ -91,21 +92,6 @@ NAN_METHOD(recvfrom){
   if ( (fd = socket(AF_UNIX, SOCK_DGRAM, 0)) == -1)
     perror("socket error");
 
-  /* make socket non-blocking */
-  int opt = fcntl(fd, F_GETFL, 0);
-  if (opt == -1)
-    opt = 0;
-  int rc = fcntl(fd, F_SETFL, opt | O_NONBLOCK);
-  if (rc < 0)
-    perror("fcntl O_NONBLOCK fail");
-
-  /* set socket's recv buffer size */
-  if (info[1]->IsNumber()) {
-    opt = To<int>(info[1]).FromJust();
-    if (setsockopt(fd, SOL_SOCKET, SO_RCVBUF, &opt, sizeof (opt)) < 0)
-      perror("SO_RCVBUF setsockopt() fail");
-    fn = info[2].As<Function>();
-  }
 
   if (info[1]->IsFunction()) {
     fn = info[1].As<Function>();
@@ -115,7 +101,25 @@ NAN_METHOD(recvfrom){
     socklen_t optlen = sizeof(optval);
     if (getsockopt(fd, SOL_SOCKET, SO_RCVBUF, &optval, &optlen) == -1)
       perror("getsockopt SO_SNDBUF");
-    opt = optval;
+
+    if (optval < opt)
+      opt = optval;
+  }
+
+  ///* make socket non-blocking */
+  //int opt = fcntl(fd, F_GETFL, 0);
+  //if (opt == -1)
+  //  opt = 0;
+  //int rc = fcntl(fd, F_SETFL, opt | O_NONBLOCK);
+  //if (rc < 0)
+  //  perror("fcntl O_NONBLOCK fail");
+
+  /* set socket's recv buffer size */
+  if (info[1]->IsNumber()) {
+    opt = To<int>(info[1]).FromJust();
+    if (setsockopt(fd, SOL_SOCKET, SO_RCVBUF, &opt, sizeof (opt)) < 0)
+      perror("SO_RCVBUF setsockopt() fail");
+    fn = info[2].As<Function>();
   }
 
   Callback *cb = new Callback(fn);
@@ -125,8 +129,7 @@ NAN_METHOD(recvfrom){
   strcpy(addr.sun_path, sockname);
 
   /* bind the socket */
-  rc = bind(fd, (struct sockaddr*)&addr, sizeof(struct sockaddr_un));
-  if(rc)
+  if (bind(fd, (struct sockaddr*)&addr, sizeof(struct sockaddr_un)))
     perror("bind() fail");
 
   /* setup the libuv polling context handle */
