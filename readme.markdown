@@ -1,4 +1,5 @@
 # recvfrom
+[![Build Status](https://travis-ci.org/reqshark/recvfrom.svg?branch=master)](https://travis-ci.org/reqshark/recvfrom)
 
 unix datagrams on osx have system recv buffer limits of 4096 bytes.
 

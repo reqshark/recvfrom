@@ -37,12 +37,13 @@ function buffers (t) {
 
   const msg = 'Hello, world!'
 
-  recvfrom(addr, buf => {
+  recvfrom(addr, recv)
+  function recv(buf){
     t.ok( isBuffer(buf),   'recv a buf' )
-    t.is( String(buf),  msg, `buffer recv'd from sendto is msg: ${msg}`  )
+    t.is( String(buf),  msg, 'buffer from sendto is msg: '+msg  )
 
     setImmediate(process.exit, 0)
-  })
+  }
 
   sendto(addr, Buffer(msg))
 }
